@@ -25,30 +25,71 @@
  * 
  */
 module.exports.createHttpHeaders = (input) => {
-    // TODO: your code here
-    return {};
-};
-
-/**
- * Returns items for a paginated list.
- * 
- * The input is in the following format:
- * items: [
- *  { id: 1, title: '<main>item 1</main>', displayTitle: 'Item 1', metadata: {} },
- * ]
- * 
- * params: {
- *  page: 1,
- *  pageSize: 4,
- *  sort: 'asc',
- * }
- * 
- * Expected output:
- * [
- *  { id: 1, title: { main: 'Item 1' }  }
- * ]
- */
-module.exports.getItems = (items, params) => {
-    // TODO: your code here
-    return [];
-}
+    if (!Array.isArray(input) || input.length === 0) return {};
+  
+      const headers = {};
+  
+      input.forEach(([key, ...values]) => {
+          const lowerKey = key.toLowerCase();
+          const newValue = values.join(', ');
+  
+          if (headers[lowerKey]) {
+              headers[lowerKey] += `, ${newValue}`;
+          } else {
+              headers[lowerKey] = newValue;
+          }
+      });
+  
+      return headers;
+  };
+  
+  /**
+   * Returns items for a paginated list.
+   * 
+   * The input is in the following format:
+   * items: [
+   *  { id: 1, title: '<main>item 1</main>', displayTitle: 'Item 1', metadata: {} },
+   * ]
+   * 
+   * params: {
+   *  page: 1,
+   *  pageSize: 4,
+   *  sort: 'asc',
+   * }
+   * 
+   * Expected output:
+   * [
+   *  { id: 1, title: { main: 'Item 1' }  }
+   * ]
+   */
+  module.exports.getItems = (items, params) => {
+      if (!Array.isArray(items) || typeof params !== 'object') return [];
+    
+      var page = params.page || 1;
+      var pageSize = params.pageSize || 10;
+      var sort = params.sort || 'asc';
+    
+      var sortedItems = [];
+      for (var i = 0; i < items.length; i++) {
+        sortedItems[i] = items[i];
+      }
+  
+      var sortedItems = items.slice(); 
+      sortedItems.sort((a, b) => {
+          return sort === 'asc' ? a.id - b.id : b.id - a.id;
+      });
+  
+      var startIndex = (page - 1) * pageSize;
+      var endIndex = startIndex + pageSize;
+      var result = [];
+      for (var i = startIndex; i < endIndex && i < sortedItems.length; i++) {
+        var item = sortedItems[i];
+        result.push({
+          id: item.id,
+          title: { main: item.displayTitle }
+        });
+      }
+      return result;
+  
+  }
+  
